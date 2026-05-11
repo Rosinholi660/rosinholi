@@ -1,19 +1,18 @@
 import streamlit as st
-import pandas as pd
 
 def aea001():
-    # Configuração da sessão
     if "nome_usuario" not in st.session_state:
         st.session_state.nome_usuario = ""
     if "tela_atual" not in st.session_state:
         st.session_state.tela_atual = "INICIAL"
+    if "opcao_escolhida" not in st.session_state:
+        st.session_state.opcao_escolhida = None
 
     def ir_para(tela):
         st.session_state.tela_atual = tela
         st.rerun()
 
     # ==================== TELAS ====================
-
     if st.session_state.tela_atual == "INICIAL":
         st.title("🚀 AEA001 v5.3 - Mentor de Otimização")
         st.write("Olá! Eu sou o **AEA001 v5.3**, seu mentor.")
@@ -33,13 +32,14 @@ def aea001():
         st.title(f"[TELA ESCOLHA DADOS]")
         st.write(f"Olá **{nome}**! Para começar, escolha como vamos trabalhar:")
         
-        opcao = st.radio("Opções:", 
-            ["1. Upload de arquivo único de reclamações",
+        opcao = st.radio("Escolha uma opção:", 
+            ["1. Upload de arquivo único de reclamações (Excel/CSV)",
              "2. Usar dados simulados realistas",
-             "3. Upload de cadastros detalhados (recomendado)"])
-        
+             "3. Upload de cadastros detalhados (recomendado)"], 
+            key="radio_opcao")
+
         if st.button("Continuar"):
-            st.session_state.dossie = {"metodo": opcao}
+            st.session_state.opcao_escolhida = opcao
             if "3" in opcao:
                 ir_para("CADASTROS_CLIENTES")
             else:
@@ -49,8 +49,6 @@ def aea001():
 
     else:
         st.title(f"[TELA {st.session_state.tela_atual}]")
-        st.write(f"Olá **{st.session_state.nome_usuario or 'Amigo'}**! Estamos avançando muito bem! 🎉")
+        st.write(f"Olá **{st.session_state.nome_usuario}**! Estamos avançando! 🎉")
 
-    # Sidebar
     st.sidebar.success(f"Usuário: {st.session_state.nome_usuario or 'Não definido'}")
-    st.sidebar.info(f"Tela atual: {st.session_state.tela_atual}")
