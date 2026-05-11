@@ -1,88 +1,53 @@
 import streamlit as st
+import pandas as pd
 
 def aea001():
     if "nome_usuario" not in st.session_state:
-        st.session_state.nome_usuario = ""
+        st.session_state.nome_usuario = "Mauricio"
     if "tela_atual" not in st.session_state:
-        st.session_state.tela_atual = "INICIAL"
+        st.session_state.tela_atual = "ROI_COMBINADO"  # Começa direto na tela bonita
 
-    def ir_para(tela):
-        st.session_state.tela_atual = tela
-        st.rerun()
+    nome = st.session_state.nome_usuario
 
-    nome = st.session_state.nome_usuario or "Mauricio"
-
-    # ===================== CABEÇALHO =====================
     st.title("🚀 AEA001 v5.3")
     st.markdown(f"**Olá {nome}!** Vamos otimizar juntos! 🎉")
 
-    # ===================== TELAS BONITAS =====================
-    if st.session_state.tela_atual == "INICIAL":
-        st.success("Bem-vindo ao seu mentor de processos!")
-        nome_input = st.text_input("Como você quer que eu te chame?", placeholder="Mauricio")
-        if st.button("Confirmar nome"):
-            if nome_input.strip():
-                st.session_state.nome_usuario = nome_input.strip()
-                ir_para("ESCOLHA_DADOS")
-                st.balloons()
-
-    elif st.session_state.tela_atual == "ESCOLHA_DADOS":
-        st.write(f"Olá **{nome}**! Como você quer trabalhar hoje?")
-        opcao = st.radio("Escolha:", 
-            ["1. Usar dados simulados (mais rápido)",
-             "2. Fazer upload de arquivos"], 
-            key="op1")
-        
-        if st.button("Continuar"):
-            ir_para("ANALISE_INICIAL")
-
-    elif st.session_state.tela_atual == "ANALISE_INICIAL":
-        st.subheader("📊 [TELA ANALISE INICIAL]")
-        st.success(f"Parabéns {nome}! Estamos avançando muito bem! 🎉")
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            st.metric("Reclamações analisadas", "247", "-18%")
-            st.metric("Custo total atual", "R$ 87.450", "-23%")
-        with col2:
-            st.metric("Causa principal", "Retrab. Logístico", "🔴")
-            st.metric("Lead time médio", "9,4 dias", "-2,1 dias")
-
-        st.button("Ir para Mapa do Processo", on_click=lambda: ir_para("MAPA_PROCESSO"))
-
-    elif st.session_state.tela_atual == "MAPA_PROCESSO":
-        st.subheader("🗺️ [TELA MAPA PROCESSO]")
-        st.write(f"Olá {nome}! Aqui está o fluxo reverso da reclamação.")
-        st.button("Ir para Melhorias", on_click=lambda: ir_para("MELHORIAS"))
-
-    elif st.session_state.tela_atual == "MELHORIAS":
-        st.subheader("🔧 Melhorias Identificadas")
-        st.button("Calcular ROI", on_click=lambda: ir_para("ROI_COMBINADO"))
-
-    elif st.session_state.tela_atual == "ROI_COMBINADO":
+    if st.session_state.tela_atual == "ROI_COMBINADO":
         st.subheader("💰 [TELA ROI COMBINADO]")
-        st.markdown("**Parabéns João!** Seu ROI ficou excelente! 🔥")
-        
+        st.markdown("**Parabéns Mauricio!** Seu ROI ficou excelente! 🔥")
+
+        # Caixa grande do ROI (igual à imagem)
         st.markdown("""
-        <div style="background-color:#0e1117; padding:20px; border-radius:10px; text-align:center;">
-            <h2 style="color:#00ff00;">ROI = 347% em 12 meses</h2>
-            <h3>Economia estimada: R$ 184.750,00</h3>
-            <h4>Payback: 4,2 meses</h4>
+        <div style="background-color:#111827; padding:25px; border-radius:15px; text-align:center; margin:15px 0;">
+            <h2 style="color:#22ff88; margin:0;">ROI = 347% em 12 meses</h2>
+            <h3 style="color:#ddd;">Economia estimada: R$ 184.750,00</h3>
+            <h4 style="color:#ddd;">Payback: 4,2 meses</h4>
         </div>
         """, unsafe_allow_html=True)
 
         col1, col2 = st.columns(2)
         with col1:
-            st.bar_chart({"Antes": [22], "Depois": [8]})
+            st.metric("Reclamações reduzidas", "64%", "🔥")
+            st.metric("Custo mensal atual", "R$ 87.450")
         with col2:
-            st.success("Melhoria de 64% nos custos!")
+            st.metric("Economia projetada", "R$ 184.750", "✅")
 
-        st.button("Ir para Plano de 90 Dias", on_click=lambda: ir_para("PLANO_90"))
+        # Gráfico
+        dados = pd.DataFrame({
+            "Período": ["Antes", "Depois"],
+            "Custo Médio": [22, 8]
+        })
+        st.bar_chart(dados.set_index("Período"), color=["#3b82f6", "#22c55e"])
+
+        st.button("✅ Confirmar e ir para Plano de 90 Dias", on_click=lambda: st.session_state.update({"tela_atual": "PLANO_90"}))
+        st.button("Re-estimar ROI", on_click=lambda: st.session_state.update({"tela_atual": "ROI_COMBINADO"}))
+
+    elif st.session_state.tela_atual == "PLANO_90":
+        st.subheader("📅 Plano de Implementação - 90 Dias")
+        st.success("Plano pronto para você, Mauricio!")
+        st.button("Voltar ao ROI", on_click=lambda: st.session_state.update({"tela_atual": "ROI_COMBINADO"}))
 
     else:
-        st.write(f"Olá **{nome}**! Estamos avançando! 🎉")
-        st.button("Voltar ao Início", on_click=lambda: ir_para("INICIAL"))
+        st.write("Estamos avançando! 🎉")
 
-    # Sidebar
     st.sidebar.success(f"Usuário: {nome}")
-    st.sidebar.info(f"Tela: {st.session_state.tela_atual}")
