@@ -1,51 +1,60 @@
 import streamlit as st
-import pandas as pd
 
 def aea001():
     if "nome_usuario" not in st.session_state:
         st.session_state.nome_usuario = "Mauricio"
+    if "historico" not in st.session_state:
+        st.session_state.historico = []
+    if "etapa" not in st.session_state:
+        st.session_state.etapa = "INICIAL"
 
     nome = st.session_state.nome_usuario
 
-    st.title("🚀 AEA001 v5.3")
-    st.markdown(f"**Olá {nome}!** Vamos otimizar juntos! 🎉")
+    st.title("🚀 AEA001 v5.3 - Seu Mentor Conversacional")
 
-    # Carregar os arquivos que você enviou
-    try:
-        reclamacoes = pd.read_excel("Reclamacoes.xlsx")
-        processos = pd.read_excel("Processos.xlsx")
-        dados_carregados = True
-    except:
-        dados_carregados = False
+    # Mostra histórico
+    for msg in st.session_state.historico:
+        with st.chat_message(msg["role"]):
+            st.write(msg["content"])
 
-    if dados_carregados:
-        st.success("✅ Planilhas carregadas com sucesso!")
-        
-        # Análise rápida
-        total_reclamacoes = len(reclamacoes)
-        custo_total = reclamacoes["Custo de correcao"].sum() if "Custo de correcao" in reclamacoes.columns else 0
+    prompt = st.chat_input("Digite aqui (ex: A, B, ACEITO, SEGUI...)")
 
-        st.subheader("📊 Análise Inicial (seus dados reais)")
-        col1, col2 = st.columns(2)
-        with col1:
-            st.metric("Total de Reclamações", total_reclamacoes)
-            st.metric("Custo Total", f"R$ {custo_total:,.2f}")
-        with col2:
-            st.metric("Processos mapeados", len(processos))
+    if prompt:
+        st.session_state.historico.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.write(prompt)
 
-    # Tela ROI Bonita
-    st.subheader("💰 [TELA ROI COMBINADO]")
-    st.success(f"**Parabéns {nome}!** Seu ROI ficou excelente! 🔥")
+        resposta = f"Olá **{nome}**! "
 
-    st.markdown("""
-    <div style="background-color:#111827; padding:30px; border-radius:20px; text-align:center; margin:20px 0;">
-        <h2 style="color:#22ff88;">ROI = 347% em 12 meses</h2>
-        <h3 style="color:#e2e8f0;">Economia estimada: R$ 184.750,00</h3>
-        <h4 style="color:#e2e8f0;">Payback: 4,2 meses</h4>
-    </div>
-    """, unsafe_allow_html=True)
+        # Controle de etapas com opções padronizadas
+        if st.session_state.etapa == "INICIAL":
+            resposta += "Que bom te ver por aqui! Vamos otimizar juntos?\n\n"
+            resposta += "**Escolha uma opção:**\n"
+            resposta += "A) Começar a análise de reclamações agora\n"
+            resposta += "B) Explicar primeiro o que é custo de mão de obra e encargos\n"
+            resposta += "C) Ver exemplo de ROI antes de começar\n"
+            st.session_state.etapa = "MENU"
 
-    st.button("✅ Confirmar e ir para Plano de 90 Dias")
-    st.button("🔄 Re-estimar ROI com meus dados")
+        elif "A" in prompt.upper() or "começar" in prompt.lower():
+            resposta += "Ótima escolha! 🎉 Você escolheu começar a análise.\n\n"
+            resposta += "**Próximo passo:** Quer usar seus arquivos reais ou dados simulados?\n"
+            resposta += "A) Usar meus arquivos Reclamacoes.xlsx e Processos.xlsx\n"
+            resposta += "B) Usar dados simulados (mais rápido)\n"
+            st.session_state.etapa = "DADOS"
 
-    st.sidebar.success(f"Usuário: {nome}")
+        elif "B" in prompt.upper() or "custo" in prompt.lower() or "encargos" in prompt.lower():
+            resposta += "Vamos falar de custo de mão de obra bem devagar:\n\n"
+            resposta += "• **Sem encargos** = só o salário bruto\n"
+            resposta += "• **Com encargos** = salário + INSS Patronal (20%) + FGTS (8%) + 13º + Férias + outros\n"
+            resposta += "No total, o custo real costuma ser **80% a 120% maior** que o salário.\n\n"
+            resposta += "Entendeu? Digite **ACEITO** para continuar."
+
+        else:
+            resposta += "Entendi! Me diz com clareza: **A**, **B**, **ACEITO**, **SEGUI** ou o que você quer fazer agora?"
+
+        st.session_state.historico.append({"role": "assistant", "content": resposta})
+        with st.chat_message("assistant"):
+            st.write(resposta)
+
+    st.sidebar.success(f"Conversando com: {nome}")
+    st.sidebar.info(f"Etapa: {st.session_state.etapa}")
